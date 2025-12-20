@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  fullName        String
+  emailVerified   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastLogin       DateTime?
+  timezone        String   @default("UTC")
+  baseCurrency    String   @default("USD")
+  experienceLevel String?
+  preferences     Json?
+
+  accounts        Mt5Account[]
+  customFields    CustomField[]
+  sessions        Session[]
+
+  @@index([email])
+}
+
+model Mt5Account {
+  id                String   @id @default(uuid())
+  userId            String
+  customName        String
+  accountNumber     String
+  encryptedPassword String
+  server            String
+  accountType       String   // 'real' or 'demo'
+  isDefault         Boolean  @default(false)
+  syncEnabled       Boolean  @default(true)
+  syncFrequency     Int      @default(5) // minutes
+  lastSync          DateTime?
+  syncStatus        String?  // 'connected', 'error', 'disabled'
+  syncErrorMessage  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades            Trade[]
+  syncLogs          SyncLog[]
+
+  @@unique([userId, accountNumber, server])
+  @@index([userId])
+}
+
+model Trade {
+  id              String   @id @default(uuid())
+  mt5AccountId    String
+  ticket          BigInt
+  symbol          String
+  type            String   // 'buy', 'sell'
+  volume          Decimal  @db.Decimal(10, 2)
+  priceOpen       Decimal  @db.Decimal(20, 5)
+  priceClose      Decimal? @db.Decimal(20, 5)
+  timeOpen        DateTime
+  timeClose       DateTime?
+  sl              Decimal? @db.Decimal(20, 5)
+  tp              Decimal? @db.Decimal(20, 5)
+  profit          Decimal? @db.Decimal(15, 2)
+  commission      Decimal? @db.Decimal(15, 2)
+  swap            Decimal? @db.Decimal(15, 2)
+  comment         String?
+  magicNumber     Int?
+  isOpen          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  account         Mt5Account      @relation(fields: [mt5AccountId], references: [id], onDelete: Cascade)
+  customValues    CustomFieldValue[]
+
+  @@unique([mt5AccountId, ticket])
+  @@index([mt5AccountId])
+  @@index([timeOpen])
+  @@index([symbol])
+}
+
+model CustomField {
+  id              String   @id @default(uuid())
+  userId          String
+  fieldName       String
+  fieldType       String   // 'text', 'select', 'checkbox', 'rating', etc.
+  fieldConfig     Json?    // Options for select, checkbox, etc.
+  isRequired      Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  showInTable     Boolean  @default(true)
+  showInStats     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  values          CustomFieldValue[]
+
+  @@unique([userId, fieldName])
+  @@index([userId])
+}
+
+model CustomFieldValue {
+  id              String   @id @default(uuid())
+  tradeId         String
+  customFieldId   String
+  value           String?  // JSON string for complex types
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trade           Trade       @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  field           CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeId, customFieldId])
+  @@index([tradeId])
+  @@index([customFieldId])
+}
+
+model SyncLog {
+  id              String   @id @default(uuid())
+  mt5AccountId    String
+  status          String   // 'success', 'warning', 'error'
+  message         String?
+  tradesSynced    Int      @default(0)
+  durationMs      Int?
+  createdAt       DateTime @default(now())
+
+  account         Mt5Account @relation(fields: [mt5AccountId], references: [id], onDelete: Cascade)
+
+  @@index([mt5AccountId])
+  @@index([createdAt])
+}
+
+model Session {
+  id              String   @id @default(uuid())
+  userId          String
+  refreshToken    String
+  deviceInfo      Json?
+  ipAddress       String?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([refreshToken])
+}
