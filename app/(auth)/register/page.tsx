@@ -46,7 +46,7 @@ export default function RegisterPage() {
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <TrendingUp className="size-4" />
             </div>
-            <span className="text-xl font-bold tracking-tight">Journal Flow</span>
+            <span className="text-xl font-bold tracking-tight">Trade Flow</span>
           </div>
           <CardTitle className="text-2xl">Créer un compte</CardTitle>
           <CardDescription>
@@ -96,7 +96,7 @@ export default function RegisterPage() {
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 pt-4">
             <Button className="w-full" type="submit" disabled={loading}>
               {loading ? "Création..." : "S'inscrire"}
             </Button>

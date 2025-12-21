@@ -15,7 +15,7 @@ export default function DashboardLayout({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex-1">
-            <h1 className="text-sm font-medium">Journal Flow</h1>
+            <h1 className="text-sm font-medium">Trade Flow</h1>
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:p-8">

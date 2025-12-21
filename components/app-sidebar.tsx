@@ -109,7 +109,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <TrendingUp className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Journal Flow</span>
+                  <span className="truncate font-semibold">Trade Flow</span>
                   <span className="truncate text-xs">Trading Intelligent</span>
                 </div>
               </a>
