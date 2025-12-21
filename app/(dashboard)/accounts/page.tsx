@@ -1,0 +1,191 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { AlertCircle, Plus, RefreshCw, Wallet } from "lucide-react"
+import { useState } from "react"
+
+export default function AccountsPage() {
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // Form state
+  const [name, setName] = useState("")
+  const [accountNum, setAccountNum] = useState("")
+  const [password, setPassword] = useState("")
+  const [server, setServer] = useState("")
+
+  const handleAddAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    // Mock API call for now
+    setTimeout(() => {
+      setLoading(false)
+      setIsAddOpen(false)
+      // Reset form
+      setName("")
+      setAccountNum("")
+      setPassword("")
+      setServer("")
+    }, 1500)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Comptes MT5</h2>
+          <p className="text-muted-foreground">Gérez vos connexions MetaTrader 5</p>
+        </div>
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Ajouter un compte
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <form onSubmit={handleAddAccount}>
+              <DialogHeader>
+                <DialogTitle>Lier un compte MT5</DialogTitle>
+                <DialogDescription>
+                  Entrez les détails de votre compte MetaTrader 5 pour commencer la synchronisation.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Nom personnalisé</Label>
+                  <Input
+                    id="name"
+                    placeholder="Ex: Mon Compte Scalping"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="accountNum">Numéro de compte</Label>
+                  <Input
+                    id="accountNum"
+                    placeholder="12345678"
+                    value={accountNum}
+                    onChange={(e) => setAccountNum(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Mot de passe Trading</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="server">Serveur</Label>
+                  <Input
+                    id="server"
+                    placeholder="Ex: Exness-MT5Real"
+                    value={server}
+                    onChange={(e) => setServer(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Vérification..." : "Lier le compte"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Mock Account Card */}
+        <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium">Mon Compte Principal</CardTitle>
+              <CardDescription className="text-xs">#12345678 • Exness-MT5Real</CardDescription>
+            </div>
+            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+          </CardHeader>
+          <CardContent>
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Solde</span>
+                <span className="font-bold">$10,245.67</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Dernière synchro</span>
+                <span className="text-xs">Il y a 2 min</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <RefreshCw className="h-3 w-3" />
+                  Sync
+                </Button>
+                <Button variant="secondary" size="sm">
+                  Détails
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account with Error */}
+        <Card className="bg-card/50 backdrop-blur-sm border-destructive/20 opacity-80">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium">Compte Demo</CardTitle>
+              <CardDescription className="text-xs">#55554444 • FTMO-Server</CardDescription>
+            </div>
+            <AlertCircle className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent>
+            <div className="mt-2 p-2 rounded bg-destructive/10 text-[10px] text-destructive flex items-start gap-2">
+              <AlertCircle className="h-3 w-3 shrink-0" />
+              <span>Erreur de connexion : identifiants incorrects ou serveur indisponible.</span>
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
+              <Button variant="outline" size="sm" className="w-full">
+                Reconnecter
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="rounded-lg border-2 border-dashed p-12 flex flex-col items-center justify-center text-center space-y-4 bg-muted/5">
+        <div className="rounded-full bg-primary/10 p-4">
+          <Wallet className="h-8 w-8 text-primary" />
+        </div>
+        <div className="max-w-[400px] space-y-2">
+          <h3 className="text-xl font-bold tracking-tight">Prêt à synchroniser ?</h3>
+          <p className="text-muted-foreground">
+            Connectez vos comptes MetaTrader 5 pour que nous puissions importer vos trades automatiquement et générer des analyses.
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => setIsAddOpen(true)}>
+          En savoir plus sur la sécurité
+        </Button>
+      </div>
+    </div>
+  )
+}
