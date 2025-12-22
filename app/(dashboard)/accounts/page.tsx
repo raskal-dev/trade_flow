@@ -1,5 +1,6 @@
 "use client"
 
+import { addMt5Account } from "@/app/actions/account-actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -14,33 +15,17 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, Plus, RefreshCw, Wallet } from "lucide-react"
-import { useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 
 export default function AccountsPage() {
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [state, formAction, isPending] = useActionState(addMt5Account, null)
 
-  // Form state
-  const [name, setName] = useState("")
-  const [accountNum, setAccountNum] = useState("")
-  const [password, setPassword] = useState("")
-  const [server, setServer] = useState("")
-
-  const handleAddAccount = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    // Mock API call for now
-    setTimeout(() => {
-      setLoading(false)
+  useEffect(() => {
+    if (state?.success) {
       setIsAddOpen(false)
-      // Reset form
-      setName("")
-      setAccountNum("")
-      setPassword("")
-      setServer("")
-    }, 1500)
-  }
+    }
+  }, [state])
 
   return (
     <div className="space-y-6">
@@ -57,7 +42,7 @@ export default function AccountsPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <form onSubmit={handleAddAccount}>
+            <form action={formAction}>
               <DialogHeader>
                 <DialogTitle>Lier un compte MT5</DialogTitle>
                 <DialogDescription>
@@ -65,33 +50,48 @@ export default function AccountsPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                {state?.error && (
+                  <div className="flex items-center gap-2 p-3 text-sm rounded bg-destructive/10 text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{state.error}</span>
+                  </div>
+                )}
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Nom personnalisé</Label>
+                  <Label htmlFor="customName">Nom personnalisé</Label>
                   <Input
-                    id="name"
+                    id="customName"
+                    name="customName"
                     placeholder="Ex: Mon Compte Scalping"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="accountNum">Numéro de compte</Label>
+                  <Label htmlFor="accountNumber">Numéro de compte</Label>
                   <Input
-                    id="accountNum"
+                    id="accountNumber"
+                    name="accountNumber"
                     placeholder="12345678"
-                    value={accountNum}
-                    onChange={(e) => setAccountNum(e.target.value)}
                     required
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="accountType">Type de compte</Label>
+                  <select
+                    id="accountType"
+                    name="accountType"
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                  >
+                    <option value="real" className="bg-background">Réel</option>
+                    <option value="demo" className="bg-background">Démo</option>
+                  </select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password">Mot de passe Trading</Label>
                   <Input
                     id="password"
+                    name="password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
@@ -99,16 +99,15 @@ export default function AccountsPage() {
                   <Label htmlFor="server">Serveur</Label>
                   <Input
                     id="server"
+                    name="server"
                     placeholder="Ex: Exness-MT5Real"
-                    value={server}
-                    onChange={(e) => setServer(e.target.value)}
                     required
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Vérification..." : "Lier le compte"}
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Vérification..." : "Lier le compte"}
                 </Button>
               </DialogFooter>
             </form>

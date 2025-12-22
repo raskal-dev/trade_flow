@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-export const addMt5Account = async (formData: FormData) => {
+export const addMt5Account = async (prevState: any, formData: FormData) => {
   try {
     const session = await auth.api.getSession({
       headers: await headers()
