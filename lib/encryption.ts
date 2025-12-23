@@ -2,8 +2,11 @@ import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
-// On récupère la clé depuis le .env (elle doit faire 32 caractères)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || ""; 
+// On crée un hash de la clé du .env pour garantir qu'elle fasse exactement 32 octets (256 bits)
+const ENCRYPTION_KEY = crypto
+  .createHash("sha256")
+  .update(String(process.env.ENCRYPTION_KEY))
+  .digest();
 
 export function encrypt(text: string) {
     const iv = crypto.randomBytes(IV_LENGTH);

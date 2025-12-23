@@ -1,7 +1,8 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { encrypt } from "@/lib/encryption";
+import { decrypt, encrypt } from "@/lib/encryption";
+import { testMt5Connection } from "@/lib/mt5";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -48,3 +49,30 @@ export const addMt5Account = async (prevState: any, formData: FormData) => {
     return { success: false, error: "Une erreur est survenue lors de la création du compte" };
   }
 };
+
+export const testAccount = async (accountId: string) => {
+  try {
+    const accountMt5 = await prisma.mt5Account.findUnique({
+      where: {
+        id: accountId,
+      },
+    });
+
+    if (!accountMt5) {
+      return { success: false, error: "Compte non trouvé" };
+    }
+
+    const password = decrypt(accountMt5.encryptedPassword);
+
+    const isConnected = await testMt5Connection({
+      accountNumber: accountMt5.accountNumber,
+      password,
+      server: accountMt5.server,
+    });
+
+    return { success: isConnected };
+  } catch (error) {
+    console.error("Erreur lors du test du compte MT5:", error);
+    return { success: false, error: "Une erreur est survenue lors du test du compte" };
+  }
+}
