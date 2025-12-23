@@ -75,4 +75,32 @@ export const testAccount = async (accountId: string) => {
     console.error("Erreur lors du test du compte MT5:", error);
     return { success: false, error: "Une erreur est survenue lors du test du compte" };
   }
-}
+};
+
+export const getMt5Accounts = async () => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const user = session?.user;
+
+    if (!user) {
+      return { success: false, error: "Utilisateur non authentifié" };
+    }
+
+    const accounts = await prisma.mt5Account.findMany({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return { success: true, accounts };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des comptes MT5:", error);
+    return { success: false, error: "Une erreur est survenue lors de la récupération des comptes" };
+  }
+};
