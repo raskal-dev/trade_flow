@@ -93,7 +93,7 @@ export const mapMt5TradeToPrisma = (mt5AccountId: string, trade: Mt5Trade) => {
 
 export const syncAccountTrades = async (accountId: string) => {
   try {
-    const mt5Traders = await fetchMt5Trades();
+    const mt5Trades = await fetchMt5Trades();
     let syncedCount = 0;
 
     for (const mt5Trade of mt5Trades) {
