@@ -1,3 +1,4 @@
+import { syncTrades } from "@/app/actions/trade-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, Clock, TrendingDown, TrendingUp } from "lucide-react"
 

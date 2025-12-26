@@ -1,6 +1,7 @@
 "use client"
 
 import { addMt5Account, getMt5Accounts, testAccount } from "@/app/actions/account-actions"
+import { syncTrades } from "@/app/actions/trade-actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -23,6 +24,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [testingId, setTestingId] = useState<string | null>(null)
+  const [syncingId, setSyncingId] = useState<string | null>(null);
 
   const [state, formAction, isPending] = useActionState(addMt5Account, null)
 
@@ -61,6 +63,18 @@ export default function AccountsPage() {
     }
     setTestingId(null)
   }
+
+  const handleSync = async (accountId: string) => {
+    setSyncingId(accountId);
+    const result = await syncTrades(accountId);
+    if (result.success) {
+      toast.success(`Synchtonisation terminée : ${result.count} trades importés.`);
+    } else {
+      toast.error(result.error);
+    }
+
+    setSyncingId(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -198,6 +212,16 @@ export default function AccountsPage() {
                         <RefreshCw className="h-3 w-3" />
                       )}
                       Tester
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => handleSync(account.id)}
+                      disabled={syncingId === account.id}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${syncingId === account.id ? 'animate-spin' : ''}`} />
+                      Sync
                     </Button>
                     <Button variant="secondary" size="sm">
                       Détails
