@@ -69,3 +69,22 @@ export const testMt5Connection = async (credentials: any): Promise<boolean> => {
   // Pour l'instant on accepte tout, mais plus tard on appellera le vrai Bridge
   return true; 
 };
+
+export const mapMt5TradeToPrisma = (mt5AccountId: string, trade: Mt5Trade) => {
+  return {
+    mt5AccountId: mt5AccountId,
+    ticket: BigInt(trade.ticket),
+    symbol: trade.symbol,
+    type: trade.type,
+    volume: trade.volume,
+    priceOpen: trade.openPrice,
+    priceClose: trade.closePrice,
+    timeOpen: trade.openTime,
+    timeClose: trade.closeTime,
+    profit: trade.profit,
+    commission: trade.commission,
+    swap: trade.swap,
+    comment: trade.comment,
+    isOpen: false,
+  }
+}

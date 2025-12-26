@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, CheckCircle2, Plus, RefreshCw, Wallet } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
+import { toast } from "sonner"
 
 export default function AccountsPage() {
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -41,7 +42,10 @@ export default function AccountsPage() {
   useEffect(() => {
     if (state?.success) {
       setIsAddOpen(false)
+      toast.success("Compte lié avec succès !")
       fetchAccounts()
+    } else if (state?.error) {
+      toast.error(state.error)
     }
   }, [state])
 
@@ -49,9 +53,11 @@ export default function AccountsPage() {
     setTestingId(accountId)
     const result = await testAccount(accountId)
     if (result.success) {
-      alert("Connexion réussie !")
+      toast.success("Connexion réussie !")
     } else {
-      alert("Échec de la connexion : " + (result.error || "Erreur inconnue"))
+      toast.error("Échec de la connexion", {
+        description: result.error || "Une erreur inconnue est survenue"
+      })
     }
     setTestingId(null)
   }

@@ -9,6 +9,7 @@ import { TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
@@ -31,9 +32,11 @@ export default function RegisterPage() {
     })
 
     if (error) {
+      toast.error(error.message || "Erreur lors de l'inscription")
       setError(error.message || "Erreur lors de l'inscription")
       setLoading(false)
     } else {
+      toast.success("Compte créé avec succès ! Bienvenue.")
       router.push("/dashboard")
     }
   }

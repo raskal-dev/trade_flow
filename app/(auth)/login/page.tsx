@@ -9,6 +9,7 @@ import { TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -29,9 +30,11 @@ export default function LoginPage() {
     })
 
     if (error) {
+      toast.error(error.message || "Erreur de connexion")
       setError(error.message || "Erreur de connexion")
       setLoading(false)
     } else {
+      toast.success("Heureux de vous revoir !")
       router.push("/dashboard")
     }
   }
