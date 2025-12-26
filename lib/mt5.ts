@@ -1,3 +1,5 @@
+import { prisma } from "./prisma";
+
 export interface Mt5Trade {
   ticket: number;
   symbol: string;
@@ -86,5 +88,43 @@ export const mapMt5TradeToPrisma = (mt5AccountId: string, trade: Mt5Trade) => {
     swap: trade.swap,
     comment: trade.comment,
     isOpen: false,
+  }
+}
+
+export const syncAccountTrades = async (accountId: string) => {
+  try {
+    const mt5Traders = await fetchMt5Trades();
+    let syncedCount = 0;
+
+    for (const mt5Trade of mt5Trades) {
+      const tradeData = mapMt5TradeToPrisma(accountId, mt5Trade);
+
+      await prisma.trade.upsert({
+        where: {
+          mt5AccountId_ticket: {
+            mt5AccountId: accountId,
+            ticket: tradeData.ticket,
+          },
+        },
+        update: {},
+        create: tradeData,
+      });
+
+      syncedCount++;
+    }
+
+    await prisma.syncLog.create({
+      data: {
+        mt5AccountId: accountId,
+        status: "success",
+        tradesSynced: syncedCount,
+        message: `Synchronisation réussie : ${syncedCount} trades traités.`,
+      },
+    });
+
+    return { success: true, count: syncedCount };
+  } catch (error) {
+    console.error("Erreur de synchro : ", error);
+    return { success: false, error: "Échec de la synchronisation" };
   }
 }
