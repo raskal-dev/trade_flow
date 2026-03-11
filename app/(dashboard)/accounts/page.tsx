@@ -32,7 +32,7 @@ export default function AccountsPage() {
     setIsLoading(true)
     const result = await getMt5Accounts()
     if (result.success) {
-      setAccounts(result.accounts || [])
+      setAccounts(result.data || [])
     }
     setIsLoading(false)
   }
@@ -68,7 +68,7 @@ export default function AccountsPage() {
     setSyncingId(accountId);
     const result = await syncTrades(accountId);
     if (result.success) {
-      toast.success(`Synchtonisation terminée : ${result.count} trades importés.`);
+      toast.success(`Synchtonisation terminée : ${result.data} trades importés.`);
     } else {
       toast.error(result.error);
     }

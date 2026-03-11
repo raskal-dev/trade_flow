@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { testMt5Connection } from "@/lib/mt5";
 import { prisma } from "@/lib/prisma";
+import { actionError, actionSuccess } from "@/lib/response";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -16,7 +17,7 @@ export const addMt5Account = async (prevState: any, formData: FormData) => {
     const user = session?.user;
 
     if (!user) {
-      return { success: false, error: "Utilisateur non authentifié" };
+      return actionError("Utilisateur non authentifié", "AUTH_REQUIRED");
     }
 
     const customName = formData.get("customName") as string;
@@ -26,7 +27,7 @@ export const addMt5Account = async (prevState: any, formData: FormData) => {
     const server = formData.get("server") as string;
 
     if (!customName || !accountNumber || !password || !server) {
-      return { success: false, error: "Tous les champs sont obligatoires" };
+      return actionError("Tous les champs sont obligatoires");
     }
 
     const encryptedPassword = encrypt(password);
@@ -43,10 +44,10 @@ export const addMt5Account = async (prevState: any, formData: FormData) => {
     });
 
     revalidatePath("/accounts");
-    return { success: true, account: mt5Account };
+    return actionSuccess(mt5Account, "Compte lié avec succès");
   } catch (error) {
     console.error("Erreur lors de l'ajout du compte MT5:", error);
-    return { success: false, error: "Une erreur est survenue lors de la création du compte" };
+    return actionError("Une erreur est survenue lors de la création du compte");
   }
 };
 
@@ -59,7 +60,7 @@ export const testAccount = async (accountId: string) => {
     });
 
     if (!accountMt5) {
-      return { success: false, error: "Compte non trouvé" };
+      return actionError("Compte non trouvé");
     }
 
     const password = decrypt(accountMt5.encryptedPassword);
@@ -70,10 +71,14 @@ export const testAccount = async (accountId: string) => {
       server: accountMt5.server,
     });
 
-    return { success: isConnected };
+    if (isConnected) {
+      return actionSuccess(true, "Connexion réussie");
+    } else {
+      return actionError("Échec de la connexion");
+    }
   } catch (error) {
     console.error("Erreur lors du test du compte MT5:", error);
-    return { success: false, error: "Une erreur est survenue lors du test du compte" };
+    return actionError("Une erreur est survenue lors du test du compte");
   }
 };
 
@@ -86,7 +91,7 @@ export const getMt5Accounts = async () => {
     const user = session?.user;
 
     if (!user) {
-      return { success: false, error: "Utilisateur non authentifié" };
+      return actionError("Utilisateur non authentifié", "AUTH_REQUIRED");
     }
 
     const accounts = await prisma.mt5Account.findMany({
@@ -98,9 +103,9 @@ export const getMt5Accounts = async () => {
       },
     });
 
-    return { success: true, accounts };
+    return actionSuccess(accounts);
   } catch (error) {
     console.error("Erreur lors de la récupération des comptes MT5:", error);
-    return { success: false, error: "Une erreur est survenue lors de la récupération des comptes" };
+    return actionError("Une erreur est survenue lors de la récupération des comptes");
   }
 };
